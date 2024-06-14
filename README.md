@@ -2,6 +2,12 @@
 # SLOOKUP and LLOOKUP for Excel
  Functions to lookup for similar values
 
+Excel has the LOOKUP, HLOOKUP, VLOOKUP and XLOOKUP function to search for values in other ranges, but they need exact matches. XLOOKUP allows for well defined substrings with wildcard characters, but does not deal random changes. The functions proposed here allow you to do this. Two functions are proposed:
+
+LLOOKUP uses Levenshtein which has a complexity of O(n^2).
+SLOOKUP uses simpleSim which has a complexity of O(n) in best and random cases and O(n^2) in worst case, so it may be faster on larger ranges.
+Both scan the entire list, so if you use them in a range, the complexity is O(needles * haystacks)
+
  LLOOKUP(needle, haystack, result, optional threshold = 0.75, optional partialstring = true, optional simplestring = true)
  Finds the best match for needle in the haystack range and returns the corresponding item in the result range using the Levensthein similarity
  Needle is interpreted as string.
