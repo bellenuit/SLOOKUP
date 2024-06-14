@@ -1,5 +1,5 @@
 
-#SLOOKUP and LLOOKUP for Excel
+# SLOOKUP and LLOOKUP for Excel
  Functions to lookup for similar values
 
  LLOOKUP(needle, haystack, result, optional threshold = 0.75, optional partialstring = true, optional simplestring = true)
