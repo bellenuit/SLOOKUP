@@ -2,6 +2,8 @@
 # SLOOKUP and LLOOKUP for Excel
  Functions to lookup for similar values
 
+![alt text](SLOOKUP.png)
+
 Excel has the LOOKUP, HLOOKUP, VLOOKUP and XLOOKUP function to search for values in other ranges, but they need exact matches. XLOOKUP allows for well defined substrings with wildcard characters, but does not deal random changes. The functions proposed here allow you to do this. Two functions are proposed:
 
 LLOOKUP uses Levenshtein which has a complexity of O(n^2).
