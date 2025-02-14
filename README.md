@@ -71,6 +71,6 @@ The algorithm can be described as following:
  
  Version 1.0 2024-06-14
  
- Author: matti@belle-nuit.com 2024
+ Author: matti@belle-nuit.com 2025
  
 
