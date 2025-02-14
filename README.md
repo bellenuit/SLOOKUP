@@ -66,6 +66,8 @@ The algorithm can be described as following:
 - The result is the score divided by the length of the needle
 
  MIT License
+
+ A JavaScript version of simpleSim is published in the project https://github.com/bellenuit/simpleSim
  
  Version 1.1 2025-02-14
  
