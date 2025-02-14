@@ -1,6 +1,6 @@
-Attribute VB_Name = "Modul3"
 ' SLOOKUP and LLOOKUP for Excel
 ' Functions to lookup for similar values
+' v 1.10 2025-02-14
 '
 ' LLOOKUP(needle, haystack, result, optional threshold = 0.75, optional partialstring = true, optional simplestring = true)
 ' Finds the best match for needle in the haystack range and returns the corresponding item in the result range using the Levensthein similarity
@@ -140,6 +140,8 @@ Dim larr() As Variant
 Dim rarr() As Variant
 Dim score, newscore As Double
 Dim h As String
+Dim th As Double
+th = threshold
 
 larr = haystack
 rarr = result
@@ -167,7 +169,7 @@ found = 0
 For i = 1 To r
     h = larr(i, 1)
     If h <> "" Then
-        newscore = SimpleSim(needle, h, simplestring)
+        newscore = SimpleSim(needle, h, True, simplestring, th)
         If newscore > score Then
             found = i
             score = newscore
@@ -189,7 +191,7 @@ End If
 
 End Function
 
-Function SimpleSim(needle As String, haystack As String, Optional partialstring As Boolean = True, Optional simplestring As Double = True) As Double
+Function SimpleSim(needle As String, haystack As String, Optional partial As Boolean = True, Optional simple As Boolean = True, Optional threshold As Double = 0#) As Double
 
 ' Calculates the similarity of needle with haystack between 0 (not at all similar) and 1 (identical) based on custom algorithm
 ' Partialstring looks for asymetric matches where needle is included in haystack but the haystack not in needle
@@ -200,49 +202,68 @@ Function SimpleSim(needle As String, haystack As String, Optional partialstring 
 ' Worst case no character of needle is present in haystack O(n*m)
 ' Random needles and haystacks O(n*36) = O(n)
 
-Dim score As Double
-Dim Offset, HaystackLength, NeedleLength, i, j, test As Integer
+Dim score, scoreThreshold As Double
+Dim offset, haystackLength, needleLength, i, j, test, position, limit As Integer
 Dim n, h As String
 
-If simplestring Then
+If simple Then
     haystack = SimpleURL(haystack)
     needle = SimpleURL(needle)
 End If
 
-score = 0
-Offset = 0
-HaystackLength = Len(haystack)
-NeedleLength = Len(needle)
+score = 0#
+offset = 1
+haystackLength = Len(haystack)
+needleLength = Len(needle)
+scoreThreshold = threshold * needleLength
 
-If NeedleLength = 0 Or HaystackLength = 0 Then
+If needleLength = 0 Or haystackLength = 0 Then
     Exit Function
 End If
     
 ' loop through needle character
-For i = 1 To NeedleLength
-n = Mid(needle, i, 1)
+For i = 1 To needleLength
+    n = Mid(needle, i, 1)
+    position = 0
     ' loop through haystack character at the last offset of last match
-    For j = Offset + 1 To Offset + HaystackLength
-        test = j
-        ' wrap over length, restart at beginning
-        If test > HaystackLength Then
-            test = test - HaystackLength
-        End If
-        h = Mid(haystack, test, 1)
-        If n = h Then
-            ' partial score per character is maximal 1 if the match is immediately
-            ' the score per character diminishes if the algorithm has to look longer
-            score = score + 1 / (j - Offset)
-            Offset = test
+    For j = offset To haystackLength
+        If Mid(haystack, j, 1) = n Then
+            position = j
             Exit For
         End If
-    Next j
-Next i
-
-SimpleSim = score / NeedleLength
+    Next
+    If position > 0 Then
+        limit = 2 * offset - position
+        If limit < 1 Then
+          limit = 1
+        End If
+    Else
+        limit = 1
+    End If
+    For j = offset - 2 To limit Step -1
+        If Mid(haystack, j, 1) = n Then
+            position = j
+            Exit For
+        End If
+    Next
+    If position > 0 Then
+        If position > offset Then
+           score = score + 1 / (position - offset + 1)
+        Else
+           score = score + 1 / (offset - position + 1)
+        End If
+    End If
+    If score + (needleLength - i) < scoreThreshold Then
+       score = 0#
+       Exit Function
+    End If
+    offset = position + 1
+Next
+    
+SimpleSim = score / needleLength
 
 ' calculate average of sim in both direction
-If Not partialstring Then
+If Not partial Then
     SimpleSim = (SimpleSim + SimpleSim(needle, haystack)) / 2
 End If
 
